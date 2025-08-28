@@ -1,27 +1,19 @@
 import org.json.JSONObject;
 import org.json.JSONException;
-
 import java.io.FileReader;
 import java.io.IOException;
 import java.math.BigInteger;
-
 public class PolynomialSecret {
     public static void main(String[] args) {
-        // Read JSON file
-        String filePath = "testcase.json"; // Adjust path as needed
+        String filePath = "testcase.json";
         JSONObject jsonObject = readJsonFile(filePath);
-
         if (jsonObject == null) {
             System.out.println("Error reading JSON file.");
             return;
         }
-
-        // Extract keys
         JSONObject keys = jsonObject.getJSONObject("keys");
         int n = keys.getInt("n");
         int k = keys.getInt("k");
-
-        // Collect points (x, y) where y is decoded from base
         int[][] points = new int[n][2];
         for (int i = 1; i <= n; i++) {
             JSONObject root = jsonObject.getJSONObject(String.valueOf(i));
@@ -32,20 +24,15 @@ public class PolynomialSecret {
             points[i - 1][0] = x;
             points[i - 1][1] = y;
         }
-
-        // Calculate secret (constant term c) using Lagrange interpolation
-        // We need at least k points, but we'll use all n if available
         int[] xValues = new int[k];
         int[] yValues = new int[k];
         for (int i = 0; i < k && i < n; i++) {
             xValues[i] = points[i][0];
             yValues[i] = points[i][1];
         }
-
         BigInteger secret = calculateConstantTerm(xValues, yValues, k);
         System.out.println("Secret (constant term c): " + secret);
     }
-
     private static JSONObject readJsonFile(String filePath) {
         try (FileReader reader = new FileReader(filePath)) {
             StringBuilder jsonContent = new StringBuilder();
@@ -59,11 +46,9 @@ public class PolynomialSecret {
             return null;
         }
     }
-
     private static int decodeBase(String value, int base) {
         return new BigInteger(value, base).intValue();
     }
-
     private static BigInteger calculateConstantTerm(int[] xValues, int[] yValues, int k) {
         BigInteger c = BigInteger.ZERO;
         for (int i = 0; i < k; i++) {
